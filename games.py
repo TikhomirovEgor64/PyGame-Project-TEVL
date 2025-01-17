@@ -2,6 +2,17 @@ import os
 import pygame
 
 
+ball_sprites = pygame.sprite.Group()
+start_billiard = True
+
+
+
+
+
+
+move_billiard_ball = False
+billiard_coord = (0, 0)
+
 def load_image(name):
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname)
@@ -101,8 +112,101 @@ class Rules(Window):
             window.draw_window()
 
 
+class Ball(pygame.sprite.Sprite):
+    def __init__(self, im, x, y, all_sprites):
+        super().__init__(all_sprites)
+        self.image = pygame.transform.scale(load_image(im), (25, 25))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.flag = False
+        self.mov = False
+        self.x1 = 0
+        self.y1 = 0
+        self.x2 = 0
+        self.y2 = 0
+        self.change_x = 0
+        self.change_y = 0
+        self.time = 0
+
+    def update(self, *args):
+        if args[0].type == pygame.MOUSEBUTTONDOWN and isinstance(window, Billiard) and self.rect.collidepoint(args[0].pos):
+            self.x1, self.y1 = args[0].pos
+            self.flag = True
+        if args[0].type == pygame.MOUSEBUTTONUP and isinstance(window, Billiard) and self.flag:
+            self.x2, self.y2 = args[0].pos
+            self.mov = True
+            self.time = 200
+            self.flag = False
+        if self.mov and self.time:
+            vx = self.x2 - self.x1
+            vy = self.y2 - self.y1
+            v = (vx ** 2 + vy ** 2) ** 0.5
+            new_x, new_y = -vx / v * 20, -vy / v * 20
+            if (self.rect.x + new_x < 235 or self.rect.x + new_x > 895) and (self.rect.y + new_y < 190 or self.rect.y + new_y > 555):
+                if self.change_x and self.change_y:
+                    self.change_x = -self.change_x
+                    self.change_y = -self.change_y
+                else:
+                    self.change_x = -new_x
+                    self.change_y = -new_y
+            elif self.rect.x + new_x < 235 or self.rect.x + new_x > 895:
+                if self.change_x and self.change_y:
+                    self.change_x = -self.change_x
+                    self.change_y = self.change_y
+                else:
+                    self.change_x = -new_x
+                    self.change_y = new_y
+            elif self.rect.y + new_y < 190 or self.rect.y + new_y > 555:
+                if self.change_x and self.change_y:
+                    self.change_x = self.change_x
+                    self.change_y = -self.change_y
+                else:
+                    self.change_x = new_x
+                    self.change_y = -new_y
+            else:
+                if self.change_x and self.change_y:
+                    self.change_x = self.change_x
+                    self.change_y = self.change_y
+                else:
+                    self.change_x = new_x
+                    self.change_y = new_y
+            
+            self.rect = self.rect.move(self.change_x, self.change_y)
+            window.draw_window()
+
+            self.time -= 1
+
+            for i in ball_sprites:
+                if pygame.sprite.collide_rect(i, self) and i != self:
+                    print(i)
+                    self.mov = False
+                    i.mov = True
+                    i.x1 = self.x1
+                    i.x2 = self.x2
+                    i.y1 = self.y1
+                    i.y2 = self.y2
+                    i.change_x = self.change_x
+                    i.change_y = self.change_y
+                    i.time = self.time
+
+            if self.time == 0:
+                for i in ball_sprites:
+                    i.flag = False
+                    i.mov = False
+                    i.x1 = 0
+                    i.y1 = 0
+                    i.x2 = 0
+                    i.y2 = 0
+                    i.change_x = 0
+                    i.change_y = 0
+                    i.time = 0
+
+        
 class Billiard(Window):
     def draw_window(self):
+        global start_billiard
+        
         screen.fill((153, 255, 153))
         
         all_sprites = pygame.sprite.Group()
@@ -127,8 +231,32 @@ class Billiard(Window):
         billiard_table.rect.x = 200
         billiard_table.rect.y = 150
         all_sprites.add(billiard_table)
+
+        global ball_sprites
+
+        images = ['red_ball.png', 'white_ball.png', 'white_ball.png', 'white_ball.png',
+                  'white_ball.png', 'white_ball.png', 'white_ball.png', 'white_ball.png',
+                  'white_ball.png', 'white_ball.png', 'white_ball.png', 'white_ball.png',
+                  'white_ball.png', 'white_ball.png', 'white_ball.png', 'white_ball.png']
+
+        if start_billiard:
+            x = [385, 665, 691, 691,
+                 717, 717, 717, 743,
+                 743, 743, 743, 769,
+                 769, 769, 769, 769]
+
+            y = [360, 360, 346, 373,
+                 334, 360, 386, 320,
+                 346, 373, 399, 308,
+                 334, 360, 386, 412]
+
+            for i in range(16):
+                ball = Ball(images[i], x[i], y[i], ball_sprites)
+            start_billiard = False
+        
         
         all_sprites.draw(screen)
+        ball_sprites.draw(screen)
         
         pygame.display.flip()
 
@@ -151,15 +279,21 @@ if __name__ == '__main__':
     pygame.display.set_caption('Главная')
     pygame.display.flip()
 
+    fps = 10000000000000000000
+    clock = pygame.time.Clock()
+
     window = Main()
     window.draw_window()
     
     running = True
     while running:
         for event in pygame.event.get():
+            ball_sprites.update(event)
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = window.get_coord(event.pos)
                 window.open_new_window()
+                print(event.pos)
+        clock.tick(fps)
     pygame.quit()
