@@ -334,29 +334,24 @@ class BulletsSprites(SpritesTankGame):
             for i in pygame.sprite.spritecollide(self, window.weak_bloks, dokill=False):
                 i.kill()
             self.kill()
-
-##        offset1 = (window.tank_map.tank2.rect.x - self.rect.x, window.tank_map.tank2.rect.y - self.rect.y)
-##
-##        if  and self.tank == 1:
-##            self.kill()
-##            window.tank_map.tank2.kill()
-##            
-##            pygame.time.delay(2000)
-##
-##            window.strong_bloks = self.tank_map.strong_bloks_sprites
-##            window.weak_bloks = self.tank_map.weak_bloks_sprites
-##            window.tanks = self.tank_map.tanks_sprites
             
         self_rect = pygame.Rect(self.rect.x, self.rect.y, 10, 10)
         tank1 = pygame.Rect(window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y, 25, 25)
         tank2 = pygame.Rect(window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y, 25, 25)
 
         if self_rect.colliderect(tank2) and self.tank == 1:
+            x, y = window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y
             self.kill()
             window.tank_map.tank2.kill()
+            
+            boom_sprite = pygame.sprite.Group()
+            block = SpritesTankGame('boom.png', x - 12, y - 12, boom_sprite, (50, 50))
+            
             window.update_window()
+            boom_sprite.draw(screen)
+            pygame.display.flip()
 
-            pygame.time.delay(1500)
+            pygame.time.delay(2000)
 
             window.score1 += 1
             
@@ -379,9 +374,16 @@ class BulletsSprites(SpritesTankGame):
             window.running = True
 
         if self_rect.colliderect(tank1) and self.tank == 2:
+            x, y = window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y
             self.kill()
             window.tank_map.tank1.kill()
+
+            boom_sprite = pygame.sprite.Group()
+            block = SpritesTankGame('boom.png', x - 12, y - 12, boom_sprite, (50, 50))
+            
             window.update_window()
+            boom_sprite.draw(screen)
+            pygame.display.flip()
 
             pygame.time.delay(1500)
 
@@ -512,6 +514,15 @@ class Tanks(Windows):
         font = pygame.font.Font(None, 70)
         games = font.render(str(window.score2), True, (255, 0, 0))
         screen.blit(games, (1010, 280))
+
+        pygame.draw.rect(screen, (255, 0, 0), (400, 10, 150, 35), 2)
+        font = pygame.font.Font(None, 40)
+        games = font.render(str(window.time / 100), True, (255, 0, 0))
+        screen.blit(games, (410, 15))
+
+        font = pygame.font.Font(None, 40)
+        games = font.render('sec', True, (255, 0, 0))
+        screen.blit(games, (500, 15))
         
         pygame.display.flip()
         
@@ -535,6 +546,8 @@ class Tanks(Windows):
 
         self.timer1 = 0
         self.timer2 = 0
+
+        self.time = 12000
 
         self.running = True
 
@@ -575,6 +588,7 @@ class Tanks(Windows):
         global running
         global window
         while self.running:
+            self.time -= 1
             if self.tank_map.bullets_sprites:
                 self.tank_map.bullets_sprites.update()
             self.tanks_moving()
@@ -627,6 +641,12 @@ class Tanks(Windows):
                             self.timer2 = 5
             self.timer1 -= 1
             self.timer2 -= 1
+            if self.time == 0:
+                pygame.time.delay(2000)
+                window = Main()
+                pygame.display.set_caption('Главная')
+                window.draw_window()
+                self.running = False
                         
                     
 
