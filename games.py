@@ -344,7 +344,7 @@ class BulletsSprites(SpritesTankGame):
         tank1 = pygame.Rect(window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y, 25, 25)
         tank2 = pygame.Rect(window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y, 25, 25)
 
-        if self_rect.colliderect(tank2) and self.tank == 1:
+        if self_rect.colliderect(tank2) and self.tank == 1 and not window.defence2:
             x, y = window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y
             self.kill()
             window.tank_map.tank2.kill()
@@ -378,7 +378,7 @@ class BulletsSprites(SpritesTankGame):
 
             window.running = True
 
-        if self_rect.colliderect(tank1) and self.tank == 2:
+        if self_rect.colliderect(tank1) and self.tank == 2 and not window.defence1:
             x, y = window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y
             self.kill()
             window.tank_map.tank1.kill()
@@ -442,6 +442,13 @@ class SpecialBullets(SpritesTankGame):
         tank2 = pygame.Rect(window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y, 25, 25)
 
         if self_rect.colliderect(tank2) and self.tank == 1:
+            if window.defence2:
+                window.score1 += 1
+            else:
+                window.score1 += 2
+
+            window.defence2 = False
+            
             x, y = window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y
             self.kill()
             window.tank_map.tank2.kill()
@@ -454,8 +461,6 @@ class SpecialBullets(SpritesTankGame):
             pygame.display.flip()
 
             pygame.time.delay(2000)
-
-            window.score1 += 2
             
             window.tank_map = TankMap1()
             window.strong_bloks = window.tank_map.strong_bloks_sprites
@@ -476,6 +481,13 @@ class SpecialBullets(SpritesTankGame):
             window.running = True
 
         if self_rect.colliderect(tank1) and self.tank == 2:
+            if window.defence1:
+                window.score2 += 1
+            else:
+                window.score2 += 2
+
+            window.defence1 = False
+            
             x, y = window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y
             self.kill()
             window.tank_map.tank1.kill()
@@ -488,8 +500,6 @@ class SpecialBullets(SpritesTankGame):
             pygame.display.flip()
 
             pygame.time.delay(1500)
-
-            window.score2 += 2
             
             window.tank_map = TankMap1()
             window.strong_bloks = window.tank_map.strong_bloks_sprites
@@ -624,6 +634,13 @@ class Tanks(Windows):
         help_sprites.draw(screen)
         window.strong_bloks.draw(screen)
         window.weak_bloks.draw(screen)
+
+        if window.defence1:
+            pygame.draw.circle(screen, (0, 0, 255), (window.tank_map.tank1.rect.x + 12, window.tank_map.tank1.rect.y + 12), 20, 2)
+
+        if window.defence2:
+            pygame.draw.circle(screen, (0, 0, 255), (window.tank_map.tank2.rect.x + 12, window.tank_map.tank2.rect.y + 12), 20, 2)
+
         window.tanks.draw(screen)
         window.tank_map.bullets_sprites.draw(screen)
 
@@ -657,7 +674,6 @@ class Tanks(Windows):
         self.strong_bloks = self.tank_map.strong_bloks_sprites
         self.weak_bloks = self.tank_map.weak_bloks_sprites
         self.tanks = self.tank_map.tanks_sprites
-        
 
         self.first_x = self.tank_map.first_x
         self.first_y = self.tank_map.first_y
@@ -672,6 +688,9 @@ class Tanks(Windows):
         self.stars_class = {'blue_star.png': (Blue_Star, self.blue_stars), 'red_star.png': (Red_Star, self.red_stars),
                             'purple_star.png': (Purple_Star, self.purple_stars), 'black_star.png': (Black_Star, self.black_stars)}
 
+        self.defence1 = False
+        self.defence2 = False
+        
         self.cor1 = 0
         self.cor2 = 180
 
@@ -689,7 +708,7 @@ class Tanks(Windows):
             star = pygame.Rect(i.rect.x, i.rect.y, 25, 25)
             if self.self_rect.colliderect(star):
                 i.kill()
-                tank.possib1 += 500
+                tank.possib1 += 150
         for i in window.red_stars:
             star = pygame.Rect(i.rect.x, i.rect.y, 25, 25)
             if self.self_rect.colliderect(star):
@@ -707,9 +726,16 @@ class Tanks(Windows):
                 tank.possib4 += 1
 
     def draw_defence(self):
-        if window.tank_map.tank1.possib1:
-            print('draw_defence')
+        if window.tank_map.tank1.possib1 and window.defence1:
             window.tank_map.tank1.possib1 -= 1
+            if window.tank_map.tank1.possib1 == 0:
+                window.defence1 = False
+            self.update_window()
+        if window.tank_map.tank2.possib1 and window.defence2:
+            window.tank_map.tank2.possib1 -= 1
+            if window.tank_map.tank2.possib1 == 0:
+                window.defence2 = False
+            self.update_window()
 
     def tanks_moving(self):
         clock.tick(30)
@@ -753,7 +779,7 @@ class Tanks(Windows):
         global window
         while self.running:
             self.time -= 1
-            if self.time % 10 == 0 and self.time != 0:
+            if self.time % 200 == 0 and self.time != 0:
                 file = choice(['blue_star.png', 'red_star.png', 'purple_star.png', 'black_star.png'])
                 star_sprite = self.stars_class[file][0](file, randint(175, 950), randint(50, 625), self.stars_class[file][1], (25, 25))
                 window.update_window()
@@ -823,7 +849,7 @@ class Tanks(Windows):
                             window.tank_map.tank1.possib3 -= 1
                             window.update_window()
                     if event.key == pygame.K_0:
-                        if self.timer2 <= 0 and window.tank_map.tank1.possib3 > 0:
+                        if self.timer2 <= 0 and window.tank_map.tank2.possib3 > 0:
                             if window.cor2 // 90 % 4 == 0:
                                 bullet = SpecialBullets('special_bullet.png', window.tank_map.tank2.rect.x + 30, window.tank_map.tank2.rect.y - 12, self.tank_map.bullets_sprites, (25, 50), cor=window.cor2, tank=2)
                             elif window.cor2 // 90 % 4 == 1:
