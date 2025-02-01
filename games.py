@@ -1,6 +1,7 @@
 import os
 import pygame
 from math import sin, cos, radians
+from random import choice, randint
 
 
 def load_image(name):
@@ -313,18 +314,22 @@ class SpritesTankGame(pygame.sprite.Sprite):
         self.tank = tank
         self.cor = cor
         self.flag = flag
+        self.possib1 = 0
+        self.possib2 = 0
+        self.possib3 = 0
+        self.possib4 = 0
 
 
 class BulletsSprites(SpritesTankGame):
     def update(self, *args):
         if self.cor // 90 % 4 == 0:
-            self.rect.x += 5
+            self.rect.x += 10
         elif self.cor // 90 % 4 == 1:
-            self.rect.y += 5
+            self.rect.y += 10
         elif self.cor // 90 % 4 == 2:
-            self.rect.x -= 5
+            self.rect.x -= 10
         elif self.cor // 90 % 4 == 3:
-            self.rect.y -= 5
+            self.rect.y -= 10
 
         if pygame.sprite.spritecollide(self, window.strong_bloks, dokill=False) or\
            self.rect.x < 175 or self.rect.x > 965 or self.rect.y < 50 or self.rect.y > 640:
@@ -410,6 +415,103 @@ class BulletsSprites(SpritesTankGame):
         window.update_window()
 
 
+class SpecialBullets(SpritesTankGame):
+    def update(self, *args):
+        if self.cor // 90 % 4 == 0:
+            self.rect.x += 10
+        elif self.cor // 90 % 4 == 1:
+            self.rect.y += 10
+        elif self.cor // 90 % 4 == 2:
+            self.rect.x -= 10
+        elif self.cor // 90 % 4 == 3:
+            self.rect.y -= 10
+
+        if pygame.sprite.spritecollide(self, window.strong_bloks, dokill=False) or\
+           pygame.sprite.spritecollide(self, window.weak_bloks, dokill=False) or\
+           self.rect.x < 175 or self.rect.x > 965 or self.rect.y < 50 or self.rect.y > 640:
+            self.kill()
+
+        for i in pygame.sprite.spritecollide(self, window.weak_bloks, dokill=False):
+            i.kill()
+
+        for i in pygame.sprite.spritecollide(self, window.strong_bloks, dokill=False):
+            i.kill()
+            
+        self_rect = pygame.Rect(self.rect.x, self.rect.y, 25, 50)
+        tank1 = pygame.Rect(window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y, 25, 25)
+        tank2 = pygame.Rect(window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y, 25, 25)
+
+        if self_rect.colliderect(tank2) and self.tank == 1:
+            x, y = window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y
+            self.kill()
+            window.tank_map.tank2.kill()
+            
+            boom_sprite = pygame.sprite.Group()
+            block = SpritesTankGame('boom.png', x - 12, y - 12, boom_sprite, (50, 50))
+            
+            window.update_window()
+            boom_sprite.draw(screen)
+            pygame.display.flip()
+
+            pygame.time.delay(2000)
+
+            window.score1 += 2
+            
+            window.tank_map = TankMap1()
+            window.strong_bloks = window.tank_map.strong_bloks_sprites
+            window.weak_bloks = window.tank_map.weak_bloks_sprites
+            window.tanks = window.tank_map.tanks_sprites
+
+            window.first_x = window.tank_map.first_x
+            window.first_y = window.tank_map.first_y
+            window.second_x = window.tank_map.second_x
+            window.second_y = window.tank_map.second_y
+
+            window.cor1 = 0
+            window.cor2 = 180
+
+            window.timer1 = 0
+            window.timer2 = 0
+
+            window.running = True
+
+        if self_rect.colliderect(tank1) and self.tank == 2:
+            x, y = window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y
+            self.kill()
+            window.tank_map.tank1.kill()
+
+            boom_sprite = pygame.sprite.Group()
+            block = SpritesTankGame('boom.png', x - 12, y - 12, boom_sprite, (50, 50))
+            
+            window.update_window()
+            boom_sprite.draw(screen)
+            pygame.display.flip()
+
+            pygame.time.delay(1500)
+
+            window.score2 += 2
+            
+            window.tank_map = TankMap1()
+            window.strong_bloks = window.tank_map.strong_bloks_sprites
+            window.weak_bloks = window.tank_map.weak_bloks_sprites
+            window.tanks = window.tank_map.tanks_sprites
+
+            window.first_x = window.tank_map.first_x
+            window.first_y = window.tank_map.first_y
+            window.second_x = window.tank_map.second_x
+            window.second_y = window.tank_map.second_y
+
+            window.cor1 = 0
+            window.cor2 = 180
+
+            window.timer1 = 0
+            window.timer2 = 0
+
+            window.running = True
+
+        window.update_window()
+
+
 class TanksSprites(SpritesTankGame):
     def update(self, *args):
         if args[0].type == pygame.KEYDOWN:
@@ -433,6 +535,26 @@ class TanksSprites(SpritesTankGame):
             window.tank_map.tank1.flag = False
             window.tank_map.tank2.flag = False
         window.update_window()
+
+
+class StarsSprites(SpritesTankGame):
+    pass
+
+
+class Blue_Star(SpritesTankGame):
+    pass
+
+
+class Red_Star(SpritesTankGame):
+    pass
+
+
+class Purple_Star(SpritesTankGame):
+    pass
+
+
+class Black_Star(SpritesTankGame):
+    pass
                     
         
 class TankMap1():
@@ -505,6 +627,11 @@ class Tanks(Windows):
         window.tanks.draw(screen)
         window.tank_map.bullets_sprites.draw(screen)
 
+        window.blue_stars.draw(screen)
+        window.red_stars.draw(screen)
+        window.purple_stars.draw(screen)
+        window.black_stars.draw(screen)
+
         pygame.draw.rect(screen, (255, 0, 0), (35, 270, 90, 70), 2)
         font = pygame.font.Font(None, 70)
         games = font.render(str(window.score1), True, (255, 0, 0))
@@ -515,14 +642,10 @@ class Tanks(Windows):
         games = font.render(str(window.score2), True, (255, 0, 0))
         screen.blit(games, (1010, 280))
 
-        pygame.draw.rect(screen, (255, 0, 0), (400, 10, 150, 35), 2)
+        pygame.draw.rect(screen, (255, 0, 0), (400, 10, 100, 35), 2)
         font = pygame.font.Font(None, 40)
         games = font.render(str(window.time / 100), True, (255, 0, 0))
         screen.blit(games, (410, 15))
-
-        font = pygame.font.Font(None, 40)
-        games = font.render('sec', True, (255, 0, 0))
-        screen.blit(games, (500, 15))
         
         pygame.display.flip()
         
@@ -541,6 +664,14 @@ class Tanks(Windows):
         self.second_x = self.tank_map.second_x
         self.second_y = self.tank_map.second_y
 
+        self.blue_stars = pygame.sprite.Group()
+        self.red_stars = pygame.sprite.Group()
+        self.purple_stars = pygame.sprite.Group()
+        self.black_stars = pygame.sprite.Group()
+
+        self.stars_class = {'blue_star.png': (Blue_Star, self.blue_stars), 'red_star.png': (Red_Star, self.red_stars),
+                            'purple_star.png': (Purple_Star, self.purple_stars), 'black_star.png': (Black_Star, self.black_stars)}
+
         self.cor1 = 0
         self.cor2 = 180
 
@@ -553,8 +684,35 @@ class Tanks(Windows):
 
         self.update_window()
 
+    def check_stars(self, tank):
+        for i in window.blue_stars:
+            star = pygame.Rect(i.rect.x, i.rect.y, 25, 25)
+            if self.self_rect.colliderect(star):
+                i.kill()
+                tank.possib1 += 500
+        for i in window.red_stars:
+            star = pygame.Rect(i.rect.x, i.rect.y, 25, 25)
+            if self.self_rect.colliderect(star):
+                i.kill()
+                tank.possib2 += 1
+        for i in window.purple_stars:
+            star = pygame.Rect(i.rect.x, i.rect.y, 25, 25)
+            if self.self_rect.colliderect(star):
+                i.kill()
+                tank.possib3 += 1
+        for i in window.black_stars:
+            star = pygame.Rect(i.rect.x, i.rect.y, 25, 25)
+            if self.self_rect.colliderect(star):
+                i.kill()
+                tank.possib4 += 1
+
+    def draw_defence(self):
+        if window.tank_map.tank1.possib1:
+            print('draw_defence')
+            window.tank_map.tank1.possib1 -= 1
+
     def tanks_moving(self):
-        clock.tick(60)
+        clock.tick(30)
         if window.tank_map.tank1.flag:
             window.tank_map.tank1.rect.x = window.first_x + cos(radians(window.cor1)) * 5
             window.tank_map.tank1.rect.y = window.first_y + sin(radians(window.cor1)) * 5
@@ -568,6 +726,9 @@ class Tanks(Windows):
             else:
                 window.first_x += cos(radians(window.cor1)) * 5
                 window.first_y += sin(radians(window.cor1)) * 5
+
+            self.self_rect = pygame.Rect(window.tank_map.tank1.rect.x, window.tank_map.tank1.rect.y, 25, 25)
+            self.check_stars(window.tank_map.tank1)
             
         if window.tank_map.tank2.flag:
             window.tank_map.tank2.rect.x = window.second_x + cos(radians(window.cor2)) * 5
@@ -582,6 +743,9 @@ class Tanks(Windows):
             else:
                 window.second_x += cos(radians(window.cor2)) * 5
                 window.second_y += sin(radians(window.cor2)) * 5
+
+            self.self_rect = pygame.Rect(window.tank_map.tank2.rect.x, window.tank_map.tank2.rect.y, 25, 25)
+            self.check_stars(window.tank_map.tank2)
         window.update_window()
 
     def run(self):
@@ -589,9 +753,16 @@ class Tanks(Windows):
         global window
         while self.running:
             self.time -= 1
-            if self.tank_map.bullets_sprites:
-                self.tank_map.bullets_sprites.update()
+            if self.time % 10 == 0 and self.time != 0:
+                file = choice(['blue_star.png', 'red_star.png', 'purple_star.png', 'black_star.png'])
+                star_sprite = self.stars_class[file][0](file, randint(175, 950), randint(50, 625), self.stars_class[file][1], (25, 25))
+                window.update_window()
+            self.tank_map.bullets_sprites.update()
+            self.blue_stars.update()
+            self.red_stars.update()
+            self.purple_stars.update()
             self.tanks_moving()
+            self.draw_defence()
             for event in pygame.event.get():
                 self.tanks.update(event)
                 if event.type == pygame.QUIT:
@@ -639,6 +810,40 @@ class Tanks(Windows):
                             window.update_window()
 
                             self.timer2 = 5
+                    if event.key == pygame.K_1:
+                        if self.timer1 <= 0 and window.tank_map.tank1.possib3 > 0:
+                            if window.cor1 // 90 % 4 == 0:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank1.rect.x + 30, window.tank_map.tank1.rect.y - 12, self.tank_map.bullets_sprites, (25, 50), cor=window.cor1, tank=1)
+                            elif window.cor1 // 90 % 4 == 1:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank1.rect.x - 12, window.tank_map.tank1.rect.y + 30, self.tank_map.bullets_sprites, (25, 50), cor=window.cor1, tank=1)
+                            elif window.cor1 // 90 % 4 == 2:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank1.rect.x - 5, window.tank_map.tank1.rect.y - 12, self.tank_map.bullets_sprites, (25, 50), cor=window.cor1, tank=1)
+                            elif window.cor1 // 90 % 4 == 3:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank1.rect.x - 12, window.tank_map.tank1.rect.y - 15, self.tank_map.bullets_sprites, (25, 50), cor=window.cor1, tank=1)
+                            window.tank_map.tank1.possib3 -= 1
+                            window.update_window()
+                    if event.key == pygame.K_0:
+                        if self.timer2 <= 0 and window.tank_map.tank1.possib3 > 0:
+                            if window.cor2 // 90 % 4 == 0:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank2.rect.x + 30, window.tank_map.tank2.rect.y - 12, self.tank_map.bullets_sprites, (25, 50), cor=window.cor2, tank=2)
+                            elif window.cor2 // 90 % 4 == 1:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank2.rect.x - 12, window.tank_map.tank2.rect.y + 30, self.tank_map.bullets_sprites, (25, 50), cor=window.cor2, tank=2)
+                            elif window.cor2 // 90 % 4 == 2:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank2.rect.x - 5, window.tank_map.tank2.rect.y - 12, self.tank_map.bullets_sprites, (25, 50), cor=window.cor2, tank=2)
+                            elif window.cor2 // 90 % 4 == 3:
+                                bullet = SpecialBullets('special_bullet.png', window.tank_map.tank2.rect.x - 12, window.tank_map.tank2.rect.y - 15, self.tank_map.bullets_sprites, (25, 50), cor=window.cor2, tank=2)
+                            window.tank_map.tank2.possib3 -= 1
+                            window.update_window()
+                    if event.key == pygame.K_2:
+                        self.defence1 = True
+                    if event.key == pygame.K_3:
+                        self.defence1 = False
+                    if event.key == pygame.K_9:
+                        self.defence2 = True
+                    if event.key == pygame.K_8:
+                        self.defence2 = False
+                        
+                            
             self.timer1 -= 1
             self.timer2 -= 1
             if self.time == 0:
