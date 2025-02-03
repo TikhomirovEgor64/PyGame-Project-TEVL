@@ -2,7 +2,7 @@ import pygame
 import random
 
 class SnakeGame:
-    def __init__(self, window_size=(720, 480), tside=30, fps=5):
+    def __init__(self, window_size=(1150, 700), tside=30, fps=5):
         pygame.init()
         self.window_size = window_size
         self.tside = tside
@@ -66,7 +66,7 @@ class SnakeGame:
 
     def draw_snake(self):
         for x, y in self.snake1:
-            pygame.draw.rect(self.screen, "green", (x * self.tside, y * self.tside, self.tside - 1, self.tside - 1))
+            pygame.draw.rect(self.screen, "purple", (x * self.tside, y * self.tside, self.tside - 1, self.tside - 1))
         for x, y in self.snake2:
             pygame.draw.rect(self.screen, "red", (x * self.tside, y * self.tside, self.tside - 1, self.tside - 1))
 
@@ -105,7 +105,7 @@ class SnakeGame:
     def run(self):
         while self.running:
             self.clock.tick(self.fps)
-            self.screen.fill("black")
+            self.screen.fill((153, 255, 153))
             self.handle_input()
 
             if not self.game_over:
