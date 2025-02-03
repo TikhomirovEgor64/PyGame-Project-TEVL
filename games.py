@@ -199,8 +199,10 @@ class SnakeGame(Windows):
         return randint(0, self.msize[0] - 1), randint(0, self.msize[1] - 1)
 
     def handle_input(self):
+        global running
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                running = False
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if not self.game_over:
@@ -288,6 +290,7 @@ class SnakeGame(Windows):
                 self.draw_gameover_screen()
 
             pygame.display.flip()
+        pygame.quit()
                         
 
 class SpritesTankGame(pygame.sprite.Sprite):
