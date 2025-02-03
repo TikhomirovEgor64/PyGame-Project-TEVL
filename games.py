@@ -2,6 +2,7 @@ import os
 import pygame
 from math import sin, cos, radians
 from random import choice, randint
+import sqlite3
 
 
 def load_image(name):
@@ -26,6 +27,7 @@ arrow.rect.x = 20
 arrow.rect.y = 90
 help_sprites.add(arrow)
 
+file = ''
 
 class Windows:
     def get_coord(self, mouse_pos):
@@ -33,6 +35,9 @@ class Windows:
 
 
 class Main(Windows):
+    def update_window(self):
+        pygame.display.set_caption('Главная')
+        
     def draw_window(self):
         screen.fill((153, 255, 153))
         
@@ -77,18 +82,31 @@ class Main(Windows):
 
 
 class Games(Windows):
+    def update_window(self):
+        pygame.display.set_caption('Игры')
+        
     def draw_window(self):
         screen.fill((153, 255, 153))
 
-        pygame.draw.rect(screen, (255, 0, 0), (650, 250, 250, 100), 2)
+        pygame.draw.rect(screen, (255, 0, 0), (250, 150, 250, 100), 2)
         font = pygame.font.Font(None, 50)
         games = font.render('Змейка', True, (255, 0, 0))
-        screen.blit(games, (700, 280))
+        screen.blit(games, (300, 180))
 
-        pygame.draw.rect(screen, (255, 0, 0), (250, 50, 250, 100), 2)
+        pygame.draw.rect(screen, (255, 0, 0), (250, 350, 250, 100), 2)
         font = pygame.font.Font(None, 50)
         games = font.render('Танчики', True, (255, 0, 0))
-        screen.blit(games, (300, 80))
+        screen.blit(games, (300, 380))
+
+        pygame.draw.rect(screen, (255, 0, 0), (650, 150, 250, 100), 2)
+        font = pygame.font.Font(None, 50)
+        games = font.render('Понг', True, (255, 0, 0))
+        screen.blit(games, (730, 180))
+
+        pygame.draw.rect(screen, (255, 0, 0), (650, 350, 250, 100), 2)
+        font = pygame.font.Font(None, 50)
+        games = font.render('Мемори', True, (255, 0, 0))
+        screen.blit(games, (710, 380))
 
         all_sprites = pygame.sprite.Group()
         home = pygame.sprite.Sprite()
@@ -118,11 +136,32 @@ class Games(Windows):
                         pygame.display.set_caption('Главная')
                         window.draw_window()
                         self.running = False
-                    elif 250 < x < 500 and 50 < y < 150:
+                    elif 250 < x < 500 and 150 < y < 250:
+                        #window = класс змейки
+                        #когда добавишь класс раскоментируй self.ranning
+                        #ниже 3 строки
+                        pygame.display.set_caption('Змейка')
+                        window.draw_window()
+                        #self.running = False
+                    elif 250 < x < 500 and 350 < y < 450:
                         window = Tanks()
                         pygame.display.set_caption('Танчики')
                         window.draw_window()
                         self.running = False
+                    elif 650 < x < 800 and 150 < y < 250:
+                        #window = класс понг
+                        #когда добавишь класс раскоментируй self.ranning
+                        #ниже 3 строки
+                        pygame.display.set_caption('Понг')
+                        window.draw_window()
+                        #self.running = False
+                    elif 650 < x < 800 and 350 < y < 450:
+                        #window = класс мемори
+                        #когда добавишь класс раскоментируй self.ranning
+                        #ниже 3 строки
+                        pygame.display.set_caption('Мемори')
+                        window.draw_window()
+                        #self.running = False
                         
 
 class SpritesTankGame(pygame.sprite.Sprite):
@@ -645,16 +684,30 @@ class Tanks(Windows):
 class Rules(Windows):
     def draw_window(self):
         screen.fill((153, 255, 153))
-        
-        pygame.draw.rect(screen, (255, 0, 0), (250, 250, 250, 100), 2)
-        font = pygame.font.Font(None, 50)
-        games = font.render('Танчики', True, (255, 0, 0))
-        screen.blit(games, (300, 280))
 
-        pygame.draw.rect(screen, (255, 0, 0), (650, 250, 250, 100), 2)
-        font = pygame.font.Font(None, 50)
-        games = font.render('Змейка', True, (255, 0, 0))
-        screen.blit(games, (700, 280))
+        for i in range(5):
+            pygame.draw.line(screen, (255, 0, 0), (150, 80 + 80 * i), (925, 80 + 80 * i), 2)
+
+        pygame.draw.line(screen, (255, 0, 0), (150, 80), (150, 400), 2)
+        pygame.draw.line(screen, (255, 0, 0), (230, 80), (230, 400), 2)
+        pygame.draw.line(screen, (255, 0, 0), (515, 80), (515, 400), 2)
+        pygame.draw.line(screen, (255, 0, 0), (925, 80), (925, 400), 2)
+
+        con = sqlite3.connect('rules.db')
+        cur = con.cursor()
+        info = list(cur.execute('''SELECT * FROM Rules'''))
+        coord = [[(160, 90), (240, 90), (525, 90)],
+                 [(160, 170), (240, 170), (525, 170)],
+                 [(160, 250), (240, 250), (525, 250)],
+                 [(160, 330), (240, 330), (525, 330)]]
+        for i, val in enumerate(info):
+            for j, elem in enumerate(val):
+                font = pygame.font.Font(None, 60)
+                if j != 2:
+                    text = font.render(str(elem), True, (0, 0, 255))
+                else:
+                    text = font.render('Прочитать правила', True, (0, 0, 255))
+                screen.blit(text, coord[i][j])
 
         all_sprites = pygame.sprite.Group()
         home = pygame.sprite.Sprite()
@@ -669,6 +722,13 @@ class Rules(Windows):
 
         self.running = True
 
+    def get_file(self, id_val):
+        global file
+        con = sqlite3.connect('rules.db')
+        cur = con.cursor()
+        file = list(cur.execute('''SELECT rules FROM Rules
+WHERE id = ?''', (id_val,)))[0][0]
+
     def run(self):
         global running
         global window
@@ -679,16 +739,69 @@ class Rules(Windows):
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = window.get_coord(event.pos)
+                    id_val = 0
                     if 20 < x < 70 and 20 < y < 70:
                         window = Main()
                         pygame.display.set_caption('Главная')
                         window.draw_window()
                         self.running = False
-                    elif 250 < x < 500 and 250 < y < 350:
-                        window = Tanks()
-                        pygame.display.set_caption('Танчики')
-                        window.draw_window()
-                        self.running = False
+                    if 515 < x < 925:
+                        if 80 < y < 160:
+                            id_val = 1
+                            self.get_file(id_val)
+                            window = ReadRules()
+                            pygame.display.set_caption('Танчики - правила')
+                            window.draw_window()
+                            self.running = False
+                        elif 160 < y < 240:
+                            id_val = 2
+                            self.get_file(id_val)
+                            window = ReadRules()
+                            pygame.display.set_caption('Змейка - правила')
+                            window.draw_window()
+                            self.running = False
+                        elif 240 < y < 320:
+                            id_val = 3
+                            self.get_file(id_val)
+                            window = ReadRules()
+                            pygame.display.set_caption('Понг - правила')
+                            window.draw_window()
+                            self.running = False
+                        elif 320 < y < 400:
+                            id_val = 4
+                            self.get_file(id_val)
+                            window = ReadRules()
+                            pygame.display.set_caption('Мемори - правила')
+                            window.draw_window()
+                            self.running = False
+
+
+
+class ReadRules(Windows):
+    def draw_window(self):
+        screen.fill((153, 255, 153))
+        help_sprites.draw(screen)
+        
+        with open(str(file), mode='r') as f:
+            rules = f.read().split('\n')
+
+        for i, val in enumerate(rules):
+            font = pygame.font.Font(None, 30)
+            rul = font.render(val, True, (255, 0, 0))
+            screen.blit(rul, (150, 50 + 30 * i))
+
+        pygame.display.flip()
+
+        self.running = True
+            
+
+    def run(self):
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    self.running = False
+                        
                         
 
 if __name__ == '__main__':
