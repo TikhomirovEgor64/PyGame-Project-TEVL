@@ -100,7 +100,7 @@ def main():
 
     geek1 = Striker(20, HEIGHT // 2 - 50, 10, 100, 10, (139, 0, 255))
     geek2 = Striker(WIDTH - 30, HEIGHT // 2 - 50, 10, 100, 10, (139, 0, 255))
-    ball = Ball(WIDTH // 2, HEIGHT // 2, 7, INITIAL_SPEED, WHITE)
+    ball = Ball(WIDTH // 2, HEIGHT // 2, 7, INITIAL_SPEED, (255, 0, 0))
 
     listOfGeeks = [geek1, geek2]
 
@@ -147,8 +147,8 @@ def main():
         geek2.display()
         ball.display()
 
-        geek1.displayScore("Geek_1: ", geek1Score, 100, 20, WHITE)
-        geek2.displayScore("Geek_2: ", geek2Score, WIDTH - 100, 20, WHITE)
+        geek1.displayScore("Geek_1: ", geek1Score, 100, 20, BLACK)
+        geek2.displayScore("Geek_2: ", geek2Score, WIDTH - 100, 20, BLACK)
 
         pygame.display.update()
         clock.tick(FPS)
