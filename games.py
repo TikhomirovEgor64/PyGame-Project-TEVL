@@ -105,8 +105,8 @@ class Games(Windows):
 
         pygame.draw.rect(screen, (255, 0, 0), (650, 350, 250, 100), 2)
         font = pygame.font.Font(None, 50)
-        games = font.render('Мемори', True, (255, 0, 0))
-        screen.blit(games, (710, 380))
+        games = font.render('КрестНолики', True, (255, 0, 0))
+        screen.blit(games, (665, 380))
 
         all_sprites = pygame.sprite.Group()
         home = pygame.sprite.Sprite()
@@ -159,7 +159,7 @@ class Games(Windows):
                         #window = класс мемори
                         #когда добавишь класс раскоментируй self.ranning
                         #ниже 3 строки
-                        pygame.display.set_caption('Мемори')
+                        pygame.display.set_caption('КрестНолики')
                         window.draw_window()
                         #self.running = False
                         
@@ -468,7 +468,7 @@ class Tanks(Windows):
 
         pygame.draw.rect(screen, (255, 0, 0), (400, 10, 100, 35), 2)
         font = pygame.font.Font(None, 40)
-        games = font.render(str(window.time / 100), True, (255, 0, 0))
+        games = font.render(str(window.time / 30)[:6], True, (255, 0, 0))
         screen.blit(games, (410, 15))
         
         pygame.display.flip()
@@ -501,7 +501,7 @@ class Tanks(Windows):
         self.timer1 = 0
         self.timer2 = 0
 
-        self.time = 12000
+        self.time = 5400
 
         self.running = True
 
@@ -593,7 +593,7 @@ class Tanks(Windows):
                 if event.type == pygame.QUIT:
                     running = False
                     self.running = False
-                    pygame.time.delay(1)
+                    pygame.time.delay(2000)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = window.get_coord(event.pos) 
                     print(x, y)
@@ -771,7 +771,7 @@ WHERE id = ?''', (id_val,)))[0][0]
                             id_val = 4
                             self.get_file(id_val)
                             window = ReadRules()
-                            pygame.display.set_caption('Мемори - правила')
+                            pygame.display.set_caption('КрестНолики - правила')
                             window.draw_window()
                             self.running = False
 
@@ -788,7 +788,7 @@ class ReadRules(Windows):
         for i, val in enumerate(rules):
             font = pygame.font.Font(None, 30)
             rul = font.render(val, True, (255, 0, 0))
-            screen.blit(rul, (150, 50 + 30 * i))
+            screen.blit(rul, (150, 30 + 30 * i))
 
         pygame.display.flip()
 
@@ -796,11 +796,27 @@ class ReadRules(Windows):
             
 
     def run(self):
+        global running
+        global window
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                     self.running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = window.get_coord(event.pos) 
+                    print(x, y)
+                    if 20 < x < 70 and 20 < y < 70:
+                        window = Main()
+                        pygame.display.set_caption('Главная')
+                        window.draw_window()
+                        self.running = False
+                    elif 20 < x < 70 and 90 < y < 140:
+                        window = Rules()
+                        pygame.display.set_caption('Правила')
+                        window.draw_window()
+                        self.running = False
+                
                         
                         
 
