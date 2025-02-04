@@ -271,8 +271,11 @@ class SnakeGame(Windows):
                 self.snake2.pop(-1)
 
     def draw_gameover_screen(self):
-        text = self.font_gameover.render("SORRY, GAME OVER", True, "white")
-        self.screen.blit(text, (self.window_size[0] // 2 - text.get_width() // 2, self.window_size[1] // 2 - 40))
+        global window
+        window = Main()
+        pygame.display.set_caption('КрестНолики')
+        window.draw_window()
+        self.running = False
 
     def run(self):
         while self.running:
@@ -288,7 +291,6 @@ class SnakeGame(Windows):
                 self.draw_gameover_screen()
 
             pygame.display.flip()
-        pygame.quit()
                         
 
 class SpritesTankGame(pygame.sprite.Sprite):
